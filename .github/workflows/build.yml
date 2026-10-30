@@ -1,0 +1,33 @@
+name: Build Game EXE
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Odbierz kod z repozytorium
+      uses: actions/checkout@v4
+
+    - name: Skonfiguruj MSYS2 i MinGW
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: UCRT64
+        update: true
+        install: mingw-w64-ucrt-x86_64-gcc
+
+    - name: Kompilacja gry do pliku EXE
+      shell: msys2 {0}
+      run: |
+        g++ -std=c++17 -O2 dungeon.cpp -o dungeon.exe -lgdi32 -static
+
+    - name: Zapisz plik EXE jako artefakt (do pobrania)
+      uses: actions/upload-artifact@v4
+      with:
+        name: dungeon-exe
+        path: dungeon.exe
